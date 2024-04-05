@@ -53,6 +53,8 @@ fn xmain() -> i32 {
     opts.optflagopt("l", "no-framelimit-until", "disables the frame-limiter until specified frame", "FRAME");
     opts.optopt("n", "project-name", "name of TAS project to create or load", "NAME");
     opts.optopt("f", "replay-file", "path to savestate file to replay", "FILE");
+    opts.optopt("g", "shorter-replay-file", "path to shorter savestate file for former half replay", "FILE");
+    opts.optopt("x", "start-frame", "Start frame for the longer operation file when merging", "FRAME");
     opts.optopt("o", "output-file", "output savestate name in replay mode", "FILE.bin");
     opts.optmulti("a", "game-arg", "argument to pass to the game", "ARG");
     opts.optflagopt("p", "start-save", "Either loads the savestate specified after this parameter or starts at the first frame. If a .gmtas is specified by -f this will start the replay from this savestate instead", "savestate");
@@ -135,7 +137,7 @@ fn xmain() -> i32 {
             })
     });
     let can_clear_temp_dir = temp_dir.is_none();
-    let replay = match matches
+    let mut replay = match matches
         .opt_str("f")
         .map(|filename| {
             let filepath = PathBuf::from(&filename);
@@ -161,7 +163,43 @@ fn xmain() -> i32 {
             return EXIT_FAILURE
         },
     };
+    let start_frame = matches.opt_str("start-frame")
+    .and_then(|x| x.parse::<usize>().ok());
+    let old_replay = match matches
+    .opt_str("g")
+    .map(|filename| {
+        let filepath = PathBuf::from(&filename);
+        match filepath.extension().and_then(|x| x.to_str()) {
+            Some("bin") => match SaveState::from_file(&filepath, &mut savestate::Buffer::new()) {
+                Ok(state) => Ok(state.into_replay()),
+                Err(e) => Err(format!("couldn't load {:?}: {:?}", filepath, e)),
+            },
 
+            Some("gmtas") => {
+                match Replay::from_file(&filepath) {
+                    Ok(old_replay) => Ok(old_replay),
+                    Err(e) => Err(format!("couldn't process {:?}: {:?}", filepath, e)),
+                }
+            },
+            _ => Err("unknown filetype for -g, expected '.bin' or '.gmtas'".into()),
+        }
+    })
+    .transpose()
+    {
+    Ok(r) => r,
+    Err(e) => {
+        eprintln!("{}", e);
+        return EXIT_FAILURE;
+    },
+    };
+
+    if let Some(old_replay) = old_replay {
+        if let Some(ref mut replay) = replay {
+            replay.merge_frames(&old_replay, start_frame);
+        } else {
+            replay = Some(old_replay);
+        }
+    }
     let input = {
         if matches.free.len() == 1 {
             &matches.free[0]

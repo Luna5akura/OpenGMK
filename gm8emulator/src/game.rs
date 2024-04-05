@@ -2215,9 +2215,9 @@ impl Game {
             match SaveState::from_file(start_save_path.unwrap(), &mut save_buffer) {
                 Ok(state) => {
                     let (rep, ren) = state.clone().load_into(&mut self);
-                    if !replay.contains_part(&rep) {
-                        panic!("Savestate is not part of replay");
-                    }
+                    // if !replay.contains_part(&rep) {
+                    //     panic!("Savestate is not part of replay");
+                    // }
 
                     frame_count = rep.frame_count();
                     clean_state = state.clean_state;

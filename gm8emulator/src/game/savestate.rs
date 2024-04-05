@@ -117,7 +117,7 @@ pub struct SaveState {
 
     audio_state: AudioState,
 
-    replay: Replay,
+    pub replay: Replay,
     screenshot: Box<[u8]>,
     zbuffer: Box<[f32]>,
 }

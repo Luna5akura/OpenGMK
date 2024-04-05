@@ -202,6 +202,26 @@ impl Replay {
         self.frames.truncate(len)
     }
 
+    // Returns a new replay with a replaced former part by old replay.Returns old replay if it's too long.
+    pub fn merge_frames(&mut self, old: &Replay,start_frame: Option<usize>) {
+        let start_frame = start_frame.unwrap_or(old.frames.len());
+        if old.frames.len() < self.frames.len() {
+            let remaining_frames = if start_frame < self.frames.len() {
+                self.frames.split_off(start_frame)
+            } else {
+                vec![]
+            };
+
+            self.frames.clear();
+
+            self.frames.extend_from_slice(&old.frames);
+
+            self.frames.extend_from_slice(&remaining_frames);
+        } else {
+            self.frames = old.frames.clone();
+        }
+    }
+
     // Returns whether this replay begins the same way as the other one.
     pub fn contains_part(&self, other: &Replay) -> bool {
         if self.frame_count() > other.frame_count() {
