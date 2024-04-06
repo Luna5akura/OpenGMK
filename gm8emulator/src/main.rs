@@ -165,7 +165,7 @@ fn xmain() -> i32 {
     };
     let start_frame = matches.opt_str("start-frame")
     .and_then(|x| x.parse::<usize>().ok());
-    let old_replay = match matches
+    let shorter_replay = match matches
     .opt_str("g")
     .map(|filename| {
         let filepath = PathBuf::from(&filename);
@@ -193,11 +193,11 @@ fn xmain() -> i32 {
     },
     };
 
-    if let Some(old_replay) = old_replay {
+    if let Some(shorter_replay) = shorter_replay {
         if let Some(ref mut replay) = replay {
-            replay.merge_frames(&old_replay, start_frame);
+            replay.merge_frames(&shorter_replay, start_frame);
         } else {
-            replay = Some(old_replay);
+            replay = Some(shorter_replay);
         }
     }
     let input = {

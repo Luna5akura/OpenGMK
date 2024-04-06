@@ -202,10 +202,10 @@ impl Replay {
         self.frames.truncate(len)
     }
 
-    // Returns a new replay with a replaced former part by old replay.Returns old replay if it's too long.
-    pub fn merge_frames(&mut self, old: &Replay,start_frame: Option<usize>) {
-        let start_frame = start_frame.unwrap_or(old.frames.len());
-        if old.frames.len() < self.frames.len() {
+    // Returns a new replay with a replaced former part by shorter replay.Returns shorter replay if it's too long.
+    pub fn merge_frames(&mut self, shorter: &Replay,start_frame: Option<usize>) {
+        let start_frame = start_frame.unwrap_or(shorter.frames.len());
+        if shorter.frames.len() < self.frames.len() {
             let remaining_frames = if start_frame < self.frames.len() {
                 self.frames.split_off(start_frame)
             } else {
@@ -214,11 +214,11 @@ impl Replay {
 
             self.frames.clear();
 
-            self.frames.extend_from_slice(&old.frames);
+            self.frames.extend_from_slice(&shorter.frames);
 
             self.frames.extend_from_slice(&remaining_frames);
         } else {
-            self.frames = old.frames.clone();
+            self.frames = shorter.frames.clone();
         }
     }
 
