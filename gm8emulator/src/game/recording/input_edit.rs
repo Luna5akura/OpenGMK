@@ -380,6 +380,10 @@ impl InputEditWindow {
                 let start = usize::min(self.selection_start_index, self.selection_end_index);
                 self.add_frames(info.replay, start, 50);
                 self.context_menu = false;
+            } else if frame.menu_item("Add 1000 frames before") {
+                let start = usize::min(self.selection_start_index, self.selection_end_index);
+                self.add_frames(info.replay, start, 1000);
+                self.context_menu = false;
             } else if frame.menu_item("Add 1 frame after") {
                 let start = usize::max(self.selection_start_index, self.selection_end_index)+1;
                 self.add_frames(info.replay, start, 1);
@@ -391,6 +395,10 @@ impl InputEditWindow {
             } else if frame.menu_item("Add 50 frames after") {
                 let start = usize::max(self.selection_start_index, self.selection_end_index)+1;
                 self.add_frames(info.replay, start, 50);
+                self.context_menu = false;
+            }else if frame.menu_item("Add 1000 frames after") {
+                let start = usize::max(self.selection_start_index, self.selection_end_index)+1;
+                self.add_frames(info.replay, start, 1000);
                 self.context_menu = false;
             } else if frame.menu_item("Delete frame(s)") {
                 let start = usize::min(self.selection_start_index, self.selection_end_index);
